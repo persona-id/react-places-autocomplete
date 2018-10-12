@@ -105,6 +105,7 @@ export const simulateSearch = wrapper => {
   input.simulate('change', { target: { value: 'San Francisco' } });
   // simulate fetching predictions
   wrapper.setState({
+    hideSuggestions: false,
     suggestions: mockSuggestions,
   });
 };

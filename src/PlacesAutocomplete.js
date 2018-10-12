@@ -24,6 +24,7 @@ class PlacesAutocomplete extends React.Component {
       suggestions: [],
       userInputValue: props.value,
       ready: !props.googleCallbackName,
+      hideSuggestions: true,
     };
 
     this.debouncedFetchPredictions = debounce(
@@ -95,6 +96,7 @@ class PlacesAutocomplete extends React.Component {
         terms: p.terms,
         types: p.types,
       })),
+      hideSuggestions: false,
     });
   };
 
@@ -125,8 +127,15 @@ class PlacesAutocomplete extends React.Component {
     });
   };
 
+  hideSuggestions = () => {
+    this.setState({
+      ...this.state,
+      hideSuggestions: true,
+    });
+  }
+
   handleSelect = (address, placeId) => {
-    this.clearSuggestions();
+    this.hideSuggestions();
     if (this.props.onSelect) {
       this.props.onSelect(address, placeId);
     } else {
@@ -206,7 +215,7 @@ class PlacesAutocomplete extends React.Component {
         this.handleUpKey();
         break;
       case 'Escape':
-        this.clearSuggestions();
+        this.hideSuggestions();
         break;
     }
     /* eslint-enable indent */
@@ -239,9 +248,16 @@ class PlacesAutocomplete extends React.Component {
 
   handleInputOnBlur = () => {
     if (!this.mousedownOnSuggestion) {
-      this.clearSuggestions();
+      this.hideSuggestions();
     }
   };
+
+  handleInputOnFocus = () => {
+    this.setState({
+      ...this.state,
+      hideSuggestions: false,
+    })
+  }
 
   getActiveSuggestionId = () => {
     const activeSuggestion = this.getActiveSuggestion();
@@ -282,6 +298,7 @@ class PlacesAutocomplete extends React.Component {
       ...options,
       onKeyDown: compose(this.handleInputKeyDown, options.onKeyDown),
       onBlur: compose(this.handleInputOnBlur, options.onBlur),
+      onFocus: compose(this.handleInputOnFocus, options.onFocus),
       value: this.props.value,
       onChange: event => {
         this.handleInputChange(event);
@@ -358,7 +375,7 @@ class PlacesAutocomplete extends React.Component {
       getInputProps: this.getInputProps,
       getSuggestionItemProps: this.getSuggestionItemProps,
       loading: this.state.loading,
-      suggestions: this.state.suggestions,
+      suggestions: this.state.hideSuggestions ? [] : this.state.suggestions,
     });
   }
 }

@@ -87,17 +87,17 @@ describe('keyboard events handlers', () => {
 
     const input = wrapper.find('input');
     input.simulate('keydown', { key: 'Escape' });
-    const { suggestions } = wrapper.state();
-    expect(suggestions.length).toEqual(0);
+    const { hideSuggestions } = wrapper.state();
+    expect(hideSuggestions).toEqual(true);
   });
 
-  test('pressing Enter key will clear suggestions', () => {
+  test('pressing Enter key will hide suggestions', () => {
     const wrapper = mountComponent();
     simulateSearch(wrapper);
 
     const input = wrapper.find('input');
     input.simulate('keydown', { key: 'Enter' });
-    const { suggestions } = wrapper.state();
-    expect(suggestions.length).toEqual(0);
+    const { hideSuggestions } = wrapper.state();
+    expect(hideSuggestions).toEqual(true);
   });
 });
