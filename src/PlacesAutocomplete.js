@@ -53,6 +53,24 @@ class PlacesAutocomplete extends React.Component {
     }
   }
 
+  /**
+   * Don't update if just changing userInputValue, this makes the module compatible with Redux.
+   */
+  shouldComponentUpdate(nextProps, nextState, _) {
+    var changed = false;
+    Object.keys(this.props).forEach(key => {
+      if (this.props[key] !== nextProps[key]) {
+        changed = true;
+      }
+    });
+    Object.keys(this.state).forEach(key => {
+      if (this.state[key] !== nextState[key] && key !== 'userInputValue') {
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
   init = () => {
     if (!window.google) {
       throw new Error(

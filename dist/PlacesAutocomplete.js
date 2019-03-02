@@ -386,6 +386,29 @@ var PlacesAutocomplete = function (_React$Component) {
         delete window[googleCallbackName];
       }
     }
+
+    /**
+     * Don't update if just changing userInputValue, this makes the module compatible with Redux.
+     */
+
+  }, {
+    key: 'shouldComponentUpdate',
+    value: function shouldComponentUpdate(nextProps, nextState, _) {
+      var _this2 = this;
+
+      var changed = false;
+      Object.keys(this.props).forEach(function (key) {
+        if (_this2.props[key] !== nextProps[key]) {
+          changed = true;
+        }
+      });
+      Object.keys(this.state).forEach(function (key) {
+        if (_this2.state[key] !== nextState[key] && key !== 'userInputValue') {
+          changed = true;
+        }
+      });
+      return changed;
+    }
   }, {
     key: 'render',
     value: function render() {
