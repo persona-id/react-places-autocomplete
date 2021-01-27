@@ -127,10 +127,10 @@ var PlacesAutocomplete = function (_React$Component) {
       }));
     };
 
-    _this.handleSelect = function (address, placeId) {
+    _this.handleSelect = function (address, placeId, suggestion) {
       _this.hideSuggestions();
       if (_this.props.onSelect) {
-        _this.props.onSelect(address, placeId);
+        _this.props.onSelect(address, placeId, suggestion);
       } else {
         _this.props.onChange(address);
       }
@@ -158,9 +158,9 @@ var PlacesAutocomplete = function (_React$Component) {
     _this.handleEnterKey = function () {
       var activeSuggestion = _this.getActiveSuggestion();
       if (activeSuggestion === undefined) {
-        _this.handleSelect(_this.props.value, null);
+        _this.handleSelect(_this.props.value, null, null);
       } else {
-        _this.handleSelect(activeSuggestion.description, activeSuggestion.placeId);
+        _this.handleSelect(activeSuggestion.description, activeSuggestion.placeId, activeSuggestion);
       }
     };
 
@@ -256,7 +256,7 @@ var PlacesAutocomplete = function (_React$Component) {
 
     _this.getActiveSuggestionId = function () {
       var activeSuggestion = _this.getActiveSuggestion();
-      return activeSuggestion ? 'PlacesAutocomplete__suggestion-' + activeSuggestion.placeId : null;
+      return activeSuggestion ? 'PlacesAutocomplete__suggestion-' + activeSuggestion.placeId : undefined;
     };
 
     _this.getIsExpanded = function () {
@@ -344,7 +344,7 @@ var PlacesAutocomplete = function (_React$Component) {
       var description = suggestion.description,
           placeId = suggestion.placeId;
 
-      _this.handleSelect(description, placeId);
+      _this.handleSelect(description, placeId, suggestion);
       setTimeout(function () {
         _this.mousedownOnSuggestion = false;
       });
@@ -358,7 +358,7 @@ var PlacesAutocomplete = function (_React$Component) {
       hideSuggestions: true
     };
 
-    _this.debouncedFetchPredictions = (0, _lodash2.default)(_this.fetchPredictions, _this.props.debounce);
+    _this.debouncedFetchPredictions = (0, _lodash2.default)(_this.fetchPredictions, props.debounce);
     return _this;
   }
 
@@ -368,7 +368,8 @@ var PlacesAutocomplete = function (_React$Component) {
       var googleCallbackName = this.props.googleCallbackName;
 
       if (googleCallbackName) {
-        if (!window.google) {
+        var isPlacesLoaded = window.google && window.google.maps && window.google.maps.places;
+        if (!isPlacesLoaded) {
           window[googleCallbackName] = this.init;
         } else {
           this.init();

@@ -207,10 +207,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }));
 	    };
 	
-	    _this.handleSelect = function (address, placeId) {
+	    _this.handleSelect = function (address, placeId, suggestion) {
 	      _this.hideSuggestions();
 	      if (_this.props.onSelect) {
-	        _this.props.onSelect(address, placeId);
+	        _this.props.onSelect(address, placeId, suggestion);
 	      } else {
 	        _this.props.onChange(address);
 	      }
@@ -238,9 +238,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _this.handleEnterKey = function () {
 	      var activeSuggestion = _this.getActiveSuggestion();
 	      if (activeSuggestion === undefined) {
-	        _this.handleSelect(_this.props.value, null);
+	        _this.handleSelect(_this.props.value, null, null);
 	      } else {
-	        _this.handleSelect(activeSuggestion.description, activeSuggestion.placeId);
+	        _this.handleSelect(activeSuggestion.description, activeSuggestion.placeId, activeSuggestion);
 	      }
 	    };
 	
@@ -336,7 +336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _this.getActiveSuggestionId = function () {
 	      var activeSuggestion = _this.getActiveSuggestion();
-	      return activeSuggestion ? 'PlacesAutocomplete__suggestion-' + activeSuggestion.placeId : null;
+	      return activeSuggestion ? 'PlacesAutocomplete__suggestion-' + activeSuggestion.placeId : undefined;
 	    };
 	
 	    _this.getIsExpanded = function () {
@@ -424,7 +424,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var description = suggestion.description,
 	          placeId = suggestion.placeId;
 	
-	      _this.handleSelect(description, placeId);
+	      _this.handleSelect(description, placeId, suggestion);
 	      setTimeout(function () {
 	        _this.mousedownOnSuggestion = false;
 	      });
@@ -438,7 +438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      hideSuggestions: true
 	    };
 	
-	    _this.debouncedFetchPredictions = (0, _lodash2.default)(_this.fetchPredictions, _this.props.debounce);
+	    _this.debouncedFetchPredictions = (0, _lodash2.default)(_this.fetchPredictions, props.debounce);
 	    return _this;
 	  }
 	
@@ -448,7 +448,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var googleCallbackName = this.props.googleCallbackName;
 	
 	      if (googleCallbackName) {
-	        if (!window.google) {
+	        var isPlacesLoaded = window.google && window.google.maps && window.google.maps.places;
+	        if (!isPlacesLoaded) {
 	          window[googleCallbackName] = this.init;
 	        } else {
 	          this.init();
@@ -465,6 +466,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (googleCallbackName && window[googleCallbackName]) {
 	        delete window[googleCallbackName];
 	      }
+	    }
+	
+	    /**
+	     * Don't update if just changing userInputValue, this makes the module compatible with Redux.
+	     */
+	
+	  }, {
+	    key: 'shouldComponentUpdate',
+	    value: function shouldComponentUpdate(nextProps, nextState, _) {
+	      var _this2 = this;
+	
+	      var changed = false;
+	      Object.keys(this.props).forEach(function (key) {
+	        if (_this2.props[key] !== nextProps[key]) {
+	          changed = true;
+	        }
+	      });
+	      Object.keys(this.state).forEach(function (key) {
+	        if (_this2.state[key] !== nextState[key] && key !== 'userInputValue') {
+	          changed = true;
+	        }
+	      });
+	      return changed;
 	    }
 	  }, {
 	    key: 'render',
@@ -3738,7 +3762,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  return props.reduce(function (newObj, prop) {
-	    if (obj.hasOwnProperty(prop)) {
+	    if (obj && obj.hasOwnProperty(prop)) {
 	      newObj[prop] = obj[prop];
 	    }
 	    return newObj;
