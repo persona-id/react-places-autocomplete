@@ -29,14 +29,16 @@ class PlacesAutocomplete extends React.Component {
 
     this.debouncedFetchPredictions = debounce(
       this.fetchPredictions,
-      this.props.debounce
+      props.debounce
     );
   }
 
   componentDidMount() {
     const { googleCallbackName } = this.props;
     if (googleCallbackName) {
-      if (!window.google) {
+      const isPlacesLoaded =
+        window.google && window.google.maps && window.google.maps.places;
+      if (!isPlacesLoaded) {
         window[googleCallbackName] = this.init;
       } else {
         this.init();
@@ -150,12 +152,12 @@ class PlacesAutocomplete extends React.Component {
       ...this.state,
       hideSuggestions: true,
     });
-  }
+  };
 
-  handleSelect = (address, placeId) => {
+  handleSelect = (address, placeId, suggestion) => {
     this.hideSuggestions();
     if (this.props.onSelect) {
-      this.props.onSelect(address, placeId);
+      this.props.onSelect(address, placeId, suggestion);
     } else {
       this.props.onChange(address);
     }
@@ -181,9 +183,13 @@ class PlacesAutocomplete extends React.Component {
   handleEnterKey = () => {
     const activeSuggestion = this.getActiveSuggestion();
     if (activeSuggestion === undefined) {
-      this.handleSelect(this.props.value, null);
+      this.handleSelect(this.props.value, null, null);
     } else {
-      this.handleSelect(activeSuggestion.description, activeSuggestion.placeId);
+      this.handleSelect(
+        activeSuggestion.description,
+        activeSuggestion.placeId,
+        activeSuggestion
+      );
     }
   };
 
@@ -274,14 +280,14 @@ class PlacesAutocomplete extends React.Component {
     this.setState({
       ...this.state,
       hideSuggestions: false,
-    })
-  }
+    });
+  };
 
   getActiveSuggestionId = () => {
     const activeSuggestion = this.getActiveSuggestion();
     return activeSuggestion
       ? `PlacesAutocomplete__suggestion-${activeSuggestion.placeId}`
-      : null;
+      : undefined;
   };
 
   getIsExpanded = () => {
@@ -382,7 +388,7 @@ class PlacesAutocomplete extends React.Component {
       event.preventDefault();
     }
     const { description, placeId } = suggestion;
-    this.handleSelect(description, placeId);
+    this.handleSelect(description, placeId, suggestion);
     setTimeout(() => {
       this.mousedownOnSuggestion = false;
     });
